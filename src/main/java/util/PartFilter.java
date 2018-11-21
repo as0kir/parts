@@ -20,6 +20,7 @@ public class PartFilter {
     public PartFilter(HttpServletRequest request) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.ENGLISH);
 
+        // на основе переданного запроса формируем объект фильтрации
         qty = 0;
         shippedBefore = null;
         shippedAfter = null;
