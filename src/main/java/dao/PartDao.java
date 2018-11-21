@@ -2,9 +2,9 @@ package dao;
 
 import model.Part;
 import util.DbUtil;
+import util.PartFilter;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,107 +17,88 @@ public class PartDao {
         this.connection = DbUtil.getConnection();
     }
 
-    public List<Part> getAllParts() {
-        List<Part> parts = new ArrayList<Part>();
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("select * from parts");
-            while (rs.next()) {
-                Part part = new Part();
-                part.setPartName(rs.getString("part_name"));
-                part.setPartNumber(rs.getString("part_number"));
-                part.setQty(rs.getInt("qty"));
-                part.setVendor(rs.getString("vendor"));
-                part.setReceive(rs.getDate("receive"));
-                part.setShipped(rs.getDate("shipped"));
-                parts.add(part);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    private String getCommandOrder(String order){
+        String commandOrder = "";
 
-        return parts;
+        if("part_name".equals(order))
+            commandOrder = "order by part_name asc";
+        else if("-part_name".equals(order))
+            commandOrder = "order by part_name desc";
+
+        else if("part_number".equals(order))
+            commandOrder = "order by part_number asc";
+        else if("-part_number".equals(order))
+            commandOrder = "order by part_number desc";
+
+        else if("vendor".equals(order))
+            commandOrder = "order by vendor asc";
+        else if("-vendor".equals(order))
+            commandOrder = "order by vendor desc";
+
+        else if("qty".equals(order))
+            commandOrder = "order by qty asc";
+        else if("-qty".equals(order))
+            commandOrder = "order by qty desc";
+
+        else if("shipped".equals(order))
+            commandOrder = "order by shipped asc";
+        else if("-shipped".equals(order))
+            commandOrder = "order by shipped desc";
+
+        else if("receive".equals(order))
+            commandOrder = "order by receive asc";
+        else if("-receive".equals(order))
+            commandOrder = "order by receive desc";
+        
+        return commandOrder;
     }
-
-    public List<Part> getPartsByFilterAndOrder(String partName, String partNumber, String vendor, int qty, LocalDate shippedBefore, LocalDate shippedAfter, LocalDate receiveBefore, LocalDate receiveAfter, String order) {
+    
+    public List<Part> getPartsByFilterAndOrder(PartFilter partFilter) throws SQLException {
         List<Part> parts = new ArrayList<Part>();
-        try {
-            String commandOrder = "";
-            if("part_name".equals(order))
-                commandOrder = "order by part_name asc";
-            else if("-part_name".equals(order))
-                commandOrder = "order by part_name desc";
+        String commandOrder = getCommandOrder(partFilter.getOrder());
 
-            else if("part_number".equals(order))
-                commandOrder = "order by part_number asc";
-            else if("-part_number".equals(order))
-                commandOrder = "order by part_number desc";
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                "select * from parts " +
+                        "where (? is null or part_name like '%'||?||'%') " +
+                        "  and (? is null or part_number like '%'||?||'%') " +
+                        "  and (? is null or vendor like '%'||?||'%') " +
+                        "  and (? is null or qty >= ?) " +
+                        "  and (cast(? as date) is null or shipped < cast(? as date)) " +
+                        "  and (cast(? as date) is null or shipped > cast(? as date)) " +
+                        "  and (cast(? as date) is null or receive < cast(? as date)) " +
+                        "  and (cast(? as date) is null or receive > cast(? as date)) " +
+                        commandOrder
+        );
+        preparedStatement.setString(1, partFilter.getPartName());
+        preparedStatement.setString(2, partFilter.getPartName());
+        preparedStatement.setString(3, partFilter.getPartNumber());
+        preparedStatement.setString(4, partFilter.getPartNumber());
+        preparedStatement.setString(5, partFilter.getVendor());
+        preparedStatement.setString(6, partFilter.getVendor());
+        preparedStatement.setInt(7, partFilter.getQty());
+        preparedStatement.setInt(8, partFilter.getQty());
 
-            else if("vendor".equals(order))
-                commandOrder = "order by vendor asc";
-            else if("-vendor".equals(order))
-                commandOrder = "order by vendor desc";
+        preparedStatement.setDate(9, partFilter.getShippedBefore() == null ? null : valueOf(partFilter.getShippedBefore()));
+        preparedStatement.setDate(10, partFilter.getShippedBefore() == null ? null : valueOf(partFilter.getShippedBefore()));
+        preparedStatement.setDate(11, partFilter.getShippedAfter() == null ? null : valueOf(partFilter.getShippedAfter()));
+        preparedStatement.setDate(12, partFilter.getShippedAfter() == null ? null : valueOf(partFilter.getShippedAfter()));
 
-            else if("qty".equals(order))
-                commandOrder = "order by qty asc";
-            else if("-qty".equals(order))
-                commandOrder = "order by qty desc";
+        preparedStatement.setDate(13, partFilter.getReceiveBefore() == null ? null : valueOf(partFilter.getReceiveBefore()));
+        preparedStatement.setDate(14, partFilter.getReceiveBefore() == null ? null : valueOf(partFilter.getReceiveBefore()));
+        preparedStatement.setDate(15, partFilter.getReceiveAfter() == null ? null : valueOf(partFilter.getReceiveAfter()));
+        preparedStatement.setDate(16, partFilter.getReceiveAfter() == null ? null : valueOf(partFilter.getReceiveAfter()));
 
-            else if("shipped".equals(order))
-                commandOrder = "order by shipped asc";
-            else if("-shipped".equals(order))
-                commandOrder = "order by shipped desc";
+        ResultSet rs = preparedStatement.executeQuery();
 
-            else if("receive".equals(order))
-                commandOrder = "order by receive asc";
-            else if("-receive".equals(order))
-                commandOrder = "order by receive desc";
-
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "select * from parts " +
-                            "where (? is null or part_name like '%'||?||'%') " +
-                            "  and (? is null or part_number like '%'||?||'%') " +
-                            "  and (? is null or vendor like '%'||?||'%') " +
-                            "  and (? is null or qty >= ?) " +
-                            "  and (cast(? as date) is null or shipped < cast(? as date)) " +
-                            "  and (cast(? as date) is null or shipped > cast(? as date)) " +
-                            "  and (cast(? as date) is null or receive < cast(? as date)) " +
-                            "  and (cast(? as date) is null or receive > cast(? as date)) " +
-                            commandOrder
-            );
-            preparedStatement.setString(1, partName);
-            preparedStatement.setString(2, partName);
-            preparedStatement.setString(3, partNumber);
-            preparedStatement.setString(4, partNumber);
-            preparedStatement.setString(5, vendor);
-            preparedStatement.setString(6, vendor);
-            preparedStatement.setInt(7, qty);
-            preparedStatement.setInt(8, qty);
-
-            preparedStatement.setDate(9, shippedBefore == null ? null : valueOf(shippedBefore));
-            preparedStatement.setDate(10, shippedBefore == null ? null : valueOf(shippedBefore));
-            preparedStatement.setDate(11, shippedAfter == null ? null : valueOf(shippedAfter));
-            preparedStatement.setDate(12, shippedAfter == null ? null : valueOf(shippedAfter));
-
-            preparedStatement.setDate(13, receiveBefore == null ? null : valueOf(receiveBefore));
-            preparedStatement.setDate(14, receiveBefore == null ? null : valueOf(receiveBefore));
-            preparedStatement.setDate(15, receiveAfter == null ? null : valueOf(receiveAfter));
-            preparedStatement.setDate(16, receiveAfter == null ? null : valueOf(receiveAfter));
-
-            ResultSet rs = preparedStatement.executeQuery();
-
-            while (rs.next()) {
-                Part part = new Part();
-                part.setPartName(rs.getString("part_name"));
-                part.setPartNumber(rs.getString("part_number"));
-                part.setQty(rs.getInt("qty"));
-                part.setVendor(rs.getString("vendor"));
-                part.setReceive(rs.getDate("receive"));
-                part.setShipped(rs.getDate("shipped"));
-                parts.add(part);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        while (rs.next()) {
+            Part part = new Part();
+            part.setPartName(rs.getString("part_name"));
+            part.setPartNumber(rs.getString("part_number"));
+            part.setQty(rs.getInt("qty"));
+            part.setVendor(rs.getString("vendor"));
+            part.setReceive(rs.getDate("receive"));
+            part.setShipped(rs.getDate("shipped"));
+            parts.add(part);
         }
 
         return parts;

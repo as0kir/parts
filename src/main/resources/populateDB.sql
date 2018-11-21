@@ -1,0 +1,10 @@
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 7', '56H212-01', 'CH-DAL', 64, '2007-03-06', '2007-03-06');
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 7', '56H212-01', 'CH-DAL', 64, '2007-03-06', null);
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 8', '56H212-01', 'CH-DAL', 64, '2007-03-06', '2007-03-06');
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 8', '56H212-01', 'CH-DAL', 64, '2007-03-06', null);
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 8', '56H212-02', 'CH-DAL', 64, '2007-03-06', '2007-03-06');
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 8', '56H212-02', 'CH-DAL', 64, '2007-03-06', null);
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 8', '56H212-01', 'CH-MAL', 64, '2007-03-06', '2007-03-06');
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 8', '56H212-01', 'CH-MAL', 64, '2007-03-06', null);
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 8', '56H212-01', 'CH-MAL', 30, '2007-03-06', '2007-03-06');
+INSERT INTO public.parts(part_name, part_number, vendor, qty, shipped, receive) VALUES('HPC Blade 8', '56H212-01', 'CH-MAL', 30, '2007-03-06', null);

@@ -1,9 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
-  <head>
+<head>
     <title></title>
-  </head>
-  <body>
+    <meta http-equiv="Refresh" content="0; URL=parts">
+</head>
+<body>
 
-  </body>
+</body>
 </html>
