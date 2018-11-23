@@ -1,6 +1,7 @@
 package controller;
 
 import dao.PartDao;
+import dao.PartDaoImpl;
 import util.PartFilter;
 
 import javax.servlet.RequestDispatcher;
@@ -16,17 +17,18 @@ public class PartController extends HttpServlet {
     private PartDao partDao;
 
     public PartController() {
-        partDao = new PartDao();
+        partDao = new PartDaoImpl();
     }
 
     private void addOrderToAttributes(HttpServletRequest request, String orderName) {
+        String queryString = request.getQueryString();
+        StringBuffer requestURL = request.getRequestURL();
+
         // предыдуший параметр сортировки
         String oldOrder = request.getParameter("order");
-        // при корректном вызове параметр должен быть задан
-        if(oldOrder != null) {
 
-            String queryString = request.getQueryString();
-            StringBuffer requestURL = request.getRequestURL();
+        // если он был задан, то заменяем на параметр orderName
+        if(oldOrder != null) {
 
             // формируем строку параметров с измененной сортировкой
             if(oldOrder.equals(orderName)) {
@@ -37,6 +39,10 @@ public class PartController extends HttpServlet {
             }
             // сохраняем измененную ссылку
             request.setAttribute("order_" + orderName, requestURL + "?" + queryString);
+        }
+        // если в параметрах не было сортировки, то добавляем
+        else {
+            request.setAttribute("order_" + orderName, requestURL + "?" + (queryString == null ? "" : queryString + "&") + "order=" + orderName);
         }
     }
 
